@@ -53,7 +53,12 @@ function ClosestLine(line1: LineSegment, line2: LineSegment) {
   }
 
   if (Math.abs(e) > EPSILON) {
-    t = clamp((line1Dir.dot(line2Dir) * s + f) / e, 0, 1);
+    const unclampedT = (line1Dir.dot(line2Dir) * s + f) / e;
+    t = clamp(unclampedT, 0, 1);
+    if (t !== unclampedT) {
+      // t was moved to an end of line2, so s must be the point on line1 closest to that end
+      s = clamp(line1Dir.dot(line2.begin.add(line2Dir.scale(t)).sub(line1.begin)) / a, 0, 1);
+    }
   } else {
     // line2 is a degenerate point
     t = 0;

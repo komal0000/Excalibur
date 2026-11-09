@@ -17,6 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Fixed issue #3917 where `getClosestLineBetween()` could return a line that was not the closest between edges and polygons, which also made `Actor.within()` wrong
 
 ### Updates
 

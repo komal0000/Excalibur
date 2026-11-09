@@ -909,6 +909,17 @@ describe('Collision Shape', () => {
       expect(line.getEdge().dot(ex.Vector.Right), 'Line from polygon to polygon should be away from polygon').toBeGreaterThan(0);
     });
 
+    it('can calculate the closest line to a polygon whose nearest corner is past the end of a side', () => {
+      const box = ex.Colliders.Polygon([ex.vec(0, 0), ex.vec(10, 0), ex.vec(10, -1), ex.vec(0, -1)]);
+      const triangle = ex.Colliders.Polygon([ex.vec(5, 1), ex.vec(15, 3), ex.vec(15, 4)]);
+
+      const line = box.getClosestLineBetween(triangle);
+
+      expect(line.begin).toBeVector(ex.vec(5, 0));
+      expect(line.end).toBeVector(ex.vec(5, 1));
+      expect(line.getLength()).toBe(1);
+    });
+
     it('can calculate the distance to another edge', () => {
       const poly = ex.Colliders.Box(40, 40, ex.Vector.Half, new ex.Vector(100, 100));
 
@@ -1140,6 +1151,27 @@ describe('Collision Shape', () => {
 
       expect(line.getLength()).toBe(100);
       expect(line.getEdge().dot(ex.Vector.Right), 'Line from circle to edge should be away from circle').toBeGreaterThan(0);
+    });
+
+    it('can calculate the closest line to an edge past the end of the other edge', () => {
+      const floor = ex.Colliders.Edge(ex.vec(0, 0), ex.vec(10, 0));
+      const ramp = ex.Colliders.Edge(ex.vec(5, 1), ex.vec(15, 3));
+      const reversedRamp = ex.Colliders.Edge(ex.vec(15, 3), ex.vec(5, 1));
+
+      for (const other of [ramp, reversedRamp]) {
+        const line = floor.getClosestLineBetween(other);
+
+        expect(line.begin).toBeVector(ex.vec(5, 0));
+        expect(line.end).toBeVector(ex.vec(5, 1));
+        expect(line.getLength()).toBe(1);
+      }
+    });
+
+    it('reports actors within the closest distance between their edges', () => {
+      const floor = new ex.Actor({ pos: ex.vec(0, 0), collider: ex.Colliders.Edge(ex.vec(0, 0), ex.vec(10, 0)) });
+      const ramp = new ex.Actor({ pos: ex.vec(0, 0), collider: ex.Colliders.Edge(ex.vec(5, 1), ex.vec(15, 3)) });
+
+      expect(floor.within(ramp, 2)).toBe(true);
     });
 
     it('can collide with a circle center edge', () => {
